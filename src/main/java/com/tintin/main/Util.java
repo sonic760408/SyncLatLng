@@ -5,6 +5,7 @@
  */
 package com.tintin.main;
 
+import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,5 +27,12 @@ public class Util {
             }
         }
         return true;
+    }
+    
+    public static String getFileExtension(File file) {
+        String fileName = file.getName();
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+        return fileName.substring(fileName.lastIndexOf(".")+1);
+        else return "";
     }
 }

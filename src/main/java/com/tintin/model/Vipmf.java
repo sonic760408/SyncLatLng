@@ -24,7 +24,7 @@ public class Vipmf implements Serializable{
     private static final Logger log = LogManager.getLogger(Vipmf.class);
     
     @Id
-    @Column(name = "vip_code")
+    @Column(name = "vip_code", unique=true)
     private String vip_code;
     
     @Column(name = "vip_name")

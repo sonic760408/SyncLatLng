@@ -98,7 +98,7 @@ public class VipmfDaoImpl implements VipmfDao {
 
     @Override
     public List<Vipmf> findAll() {
-        int maxRows = 20, start = 0;
+        int maxRows = 10000, start = 0;
 
         String sql_query = "FROM Vipmf "
                 + "WHERE TRIM(address) != '' "

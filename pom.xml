@@ -263,12 +263,18 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <mainClass>com.tintin.main.App</mainClass>
                     <executable>java</executable>
                     <arguments>
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>-DexportDir=.</argument>
                         <argument>${mainClass}</argument>
+                        <!-- 參數測試用 -->
+                        <!--
+                        <argument>-import</argument>
+                        <argument>Address_Finish.csv</argument>
+                        -->
                     </arguments>
                     <skip>${skipTests}</skip>
                 </configuration>

@@ -24,7 +24,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -70,7 +72,6 @@ public class Worker implements Runnable, DisposableBean {
     private static final Logger log = LogManager.getLogger(Worker.class);
     private static final int TIMEOUT = 5000;
 
-    private String authSessionid = null;
     private VipmfService vipmfService;
     private final String TEMP_CSV_FILE = "temp.csv";
 
@@ -101,19 +102,32 @@ public class Worker implements Runnable, DisposableBean {
 
     private List<Cookie> cookies;
 
+    private String tag = "";
+    private String import_filepath = "";
+
+    public Worker(String[] args) {
+        // store parameter for later user
+        if (args != null) {
+            tag = args[0];
+            import_filepath = args[1];
+        }
+    }
+
     @Override
     public void run() {
-        start();
+        if (tag.equals("-import")) {
+            start_import();
+        } else {
+            start_sync();
+        }
     }
 
     @Override
     public void destroy() throws Exception {
-        if (StringUtils.hasText(authSessionid)) {
-            logout();
-        }
+
     }
 
-    private void start() {
+    private void start_sync() {
         //setup xml
         try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/config/BeanLocations.xml")) {
             context.registerShutdownHook();
@@ -125,9 +139,9 @@ public class Worker implements Runnable, DisposableBean {
                 writeTempCsv();
                 cookies = getCookie();
                 if (cookies != null) {
-                    doLogin(cookies);
-                    uploadCsv(cookies);
-                    doLogout();
+                    //doLogin(cookies);
+                    //uploadCsv(cookies);
+                    //doLogout();
                 }
 
             } else {
@@ -257,18 +271,6 @@ public class Worker implements Runnable, DisposableBean {
             }
         } else {
             log.error("CODE: " + statuscode + ", CAUSED: " + response.getStatusLine().getReasonPhrase());
-            /*
-            try {
-                String str = EntityUtils.toString(response.getEntity());
-                EntityUtils.consume(response.getEntity());
-                log.info(" xxx: " + str);
-            } catch (IOException e) {
-                e.printStackTrace();
-                log.error(e.getLocalizedMessage());
-            } catch (ParseException e) {
-                log.error(e.getLocalizedMessage());
-            }
-             */
         }
 
         try {
@@ -300,11 +302,9 @@ public class Worker implements Runnable, DisposableBean {
         CloseableHttpClient http;
         HttpPost post = new HttpPost(UPLOAD_QUERY_URL + URLENCODED);
 
-        String boundary = "---------------------------" + System.currentTimeMillis(); 
-        
-        //使用multipart/form-data上傳, 不要使用content-type, boundary為變值, 設定此header會使request failed 
-        //post.setHeader("Content-Type", "multipart/form-data; ");
-        //post.setHeader("enctype", "multipart/form-data");
+        //設定boundary為Unique ID(timestamp)
+        String boundary = "---------------------------" + System.currentTimeMillis();
+
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, TIMEOUT); //5sec
         http = new DefaultHttpClient(httpParams);
@@ -320,9 +320,9 @@ public class Worker implements Runnable, DisposableBean {
 
         if (file.exists()) {
             if (file.isFile()) {
-                log.debug(" FIND FILE: "+TEMP_CSV_FILE);
+                log.debug(" FIND FILE: " + TEMP_CSV_FILE);
             } else {
-                log.debug(" WRONG FILE  "+TEMP_CSV_FILE);
+                log.debug(" WRONG FILE  " + TEMP_CSV_FILE);
             }
         } else {
             log.error(" NO FIND FILE ON " + currentRelativePath + TEMP_CSV_FILE);
@@ -332,7 +332,7 @@ public class Worker implements Runnable, DisposableBean {
         log.info("FILENAME: " + file.getAbsolutePath());
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
-        FileBody filebody = new FileBody(file,ContentType.create("text/csv"));
+        FileBody filebody = new FileBody(file, ContentType.create("text/csv"));
 
         try {
 
@@ -351,9 +351,9 @@ public class Worker implements Runnable, DisposableBean {
             post.setEntity(builder.build());
             post.addHeader("Referer", UPLOAD_URL);
             post.addHeader("Cookie", cookie_req);
-            post.addHeader("Content-Type", "multipart/form-data; boundary="+boundary);   //使用boundary來確認資料有上傳成功
+            post.addHeader("Content-Type", "multipart/form-data; boundary=" + boundary);   //使用boundary來確認資料有上傳成功
             builder.setCharset(Charset.forName("UTF-8"));
-            
+
             Header[] headers = post.getAllHeaders();
             log.info("HEADER: ");
             for (Header header : headers) {
@@ -363,8 +363,7 @@ public class Worker implements Runnable, DisposableBean {
             HttpEntity entity = post.getEntity();
             String responseString = EntityUtils.toString(entity, "UTF-8");
             log.info("xxx ENTITY: " + responseString);
-            
-            
+
             response = http.execute(post);
         } catch (Exception e) {
             e.printStackTrace();
@@ -398,11 +397,11 @@ public class Worker implements Runnable, DisposableBean {
                 log.error(e.getLocalizedMessage());
             } catch (ParseException e) {
                 log.error(e.getLocalizedMessage());
-            } 
+            }
         } else {
             log.error("CODE: " + statuscode + ", CAUSED: " + response.getStatusLine().getReasonPhrase());
         }
-        
+
         try {
             http.close();
         } catch (IOException e) {
@@ -588,14 +587,10 @@ public class Worker implements Runnable, DisposableBean {
         return isSuccess;
     }
 
-    private void logout() {
-
-    }
-
     private void doWriteCSV(List<Vipmf> vipmfs) {
         CSVFormat format = CSVFormat.DEFAULT
-                    .withHeader("id", "Address", "Response_Address", "Response_X", "Response_Y");
-        
+                .withHeader("id", "Address", "Response_Address", "Response_X", "Response_Y");
+
         OutputStreamWriter osw = null;
         try {
             osw = new OutputStreamWriter(new FileOutputStream(Paths.get(TEMP_CSV_FILE).toString()), "UTF-8");
@@ -603,7 +598,6 @@ public class Worker implements Runnable, DisposableBean {
 
             //CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
             //        .withHeader("id", "Address", "Response_Address", "Response_X", "Response_Y"));
-            
             CSVPrinter csvPrinter = new CSVPrinter(osw, format);
             for (Vipmf item : vipmfs) {
                 csvPrinter.printRecord(item.getVip_code().trim(), item.getAddress().trim(), "", "", "");
@@ -611,7 +605,7 @@ public class Worker implements Runnable, DisposableBean {
 
             csvPrinter.flush();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getLocalizedMessage());
         } finally {
             if (osw != null) {
@@ -624,7 +618,57 @@ public class Worker implements Runnable, DisposableBean {
         }
     }
 
-    private void doReadCSV() {
+    private void start_import() {
+        File file = new File(import_filepath);
+        if (file.exists() == false) {
+            String err = "找不到檔案: " + import_filepath;
+            //System.out.println(err);
+            log.error(err);
+        } else if ("csv".equals(Util.getFileExtension(file))) {
+            CSVFormat format = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .withIgnoreHeaderCase()
+                    .withTrim();
+            InputStreamReader isr = null;
+            try {
+                isr = new InputStreamReader(new FileInputStream(Paths.get(import_filepath).toString()), "UTF-8");
 
+                //read csv
+                CSVParser csvParser = new CSVParser(isr, format);
+                for (CSVRecord csvRecord : csvParser) {
+                    // Accessing values by Header names
+                    String id = csvRecord.get("id");
+                    String addr = csvRecord.get("Address");
+                    String response_addr = csvRecord.get("Response_Address");
+                    String response_X = csvRecord.get("Response_X");
+                    String response_y = csvRecord.get("Response_Y");
+                    
+                    String str = "REC["+ csvRecord.getRecordNumber()+"]: "
+                            + "ID: "+id
+                            + ", ADDR: "+addr
+                            + ", RES_ADDR: "+response_addr
+                            + ", RES_X: "+response_X
+                            + ", RES_Y: "+response_y;
+                    log.info(str);
+                }
+                
+                
+            } catch (Exception e) {
+                log.error(e.getLocalizedMessage());
+            } finally {
+                if (isr != null) {
+                    try {
+                        isr.close();
+                    } catch (IOException e) {
+                        log.error(e.getLocalizedMessage());
+                    }
+                }
+            }
+
+        } else {
+            String err = "檔案格式不正確, 非csv檔: " + import_filepath;
+            //System.out.println(err);
+            log.error(err);
+        }
     }
 }
