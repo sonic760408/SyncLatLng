@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- setup db -->
+        <property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
+        <property name="hibernate.connection.url">jdbc:db2://192.168.10.3:50000/INVDB</property>
+        <property name="hibernate.connection.username">db2inst1</property>
+        <property name="hibernate.connection.password">ibmdb2</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
+    
+        <property name="show_sql">false</property>
+        <property name="format_sql">false</property>
+        <property name="use_sql_comments">false</property>
+    
+        <!-- setup dbpool -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.acquire_increment">2</property>
+        <property name="hibernate.c3p0.acquire_increment">1800</property>
+        <property name="hibernate.c3p0.max_statements">150</property>
+    
+        <!-- Mapping With Model Class Containing Annotations -->
+        <mapping class="com.tintin.model.Vipmf" />
+        <mapping class="com.tintin.model.Vipmf_latlng" />
+        
+    </session-factory>
+</hibernate-configuration>
