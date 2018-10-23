@@ -20,7 +20,8 @@ import org.apache.logging.log4j.Logger;
 @Entity
 @Table(name = "vipmf")
 public class Vipmf implements Serializable{
-    
+
+    private static final long serialVersionUID = 7004359212422767087L;
     private static final Logger log = LogManager.getLogger(Vipmf.class);
     
     @Id

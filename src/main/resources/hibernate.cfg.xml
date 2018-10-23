@@ -6,12 +6,18 @@
 <hibernate-configuration>
     <session-factory>
         <!-- setup db -->
+        
         <property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
         <property name="hibernate.connection.url">jdbc:db2://192.168.10.3:50000/INVDB</property>
         <property name="hibernate.connection.username">db2inst1</property>
         <property name="hibernate.connection.password">ibmdb2</property>
         <property name="hibernate.dialect">org.hibernate.dialect.DB2Dialect</property>
-    
+        
+        <property name="hibernate.jdbc.batch_size">100</property>
+        <property name="hibernate.order_inserts">true</property>
+        <property name="hibernate.order_updates">true</property>
+        <property name="hibernate.jdbc.batch_versioned_data">true</property>
+        
         <property name="show_sql">false</property>
         <property name="format_sql">false</property>
         <property name="use_sql_comments">false</property>
@@ -25,7 +31,7 @@
     
         <!-- Mapping With Model Class Containing Annotations -->
         <mapping class="com.tintin.model.Vipmf" />
-        <mapping class="com.tintin.model.Vipmf_latlng" />
+        <mapping class="com.tintin.model.VipmfLatLng" />
         
     </session-factory>
 </hibernate-configuration>

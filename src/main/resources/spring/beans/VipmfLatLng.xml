@@ -1,0 +1,16 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- VipmfLatLng Service object -->
+    <bean id="vipmfLatLngService" class="com.tintin.service.impl.VipmfLatLngServiceImpl" >
+        <property name="vipmfLatLngDao" ref="vipmfLatLngDao" />
+    </bean>
+ 
+    <!-- VipmfLatLng Data Access Object -->
+    <bean id="vipmfLatLngDao" class="com.tintin.dao.impl.VipmfLatLngDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+</beans>

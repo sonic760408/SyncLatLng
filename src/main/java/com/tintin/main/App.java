@@ -47,7 +47,7 @@ public class App {
                 case "-import":
                     if (args.length != 2) {
                         printUsage();
-                        throw new IllegalArgumentException("-import <File>, 必須要加入csv檔案來源");
+                        throw new IllegalArgumentException("-import <URL>, 必須要加入有效的URL網址");
                     }else
                     {
                         log.info("執行會員地址座標產生的csv結果匯入到資料庫內");
@@ -74,8 +74,8 @@ public class App {
                 + "\n"
                 + "SyncLatLng \n "
                 + "    執行會員地址座標擷取"
-                + "SyncLatLng -import <file>\n"
-                + "    執行會員地址座標產生的csv結果匯入到資料庫內\n"
+                + "SyncLatLng -import <URL>\n"
+                + "    下載會員地址座標產生結果的csv檔案並匯入到資料庫內\n"
         );
 
     }

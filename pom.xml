@@ -271,10 +271,10 @@
                         <argument>-DexportDir=.</argument>
                         <argument>${mainClass}</argument>
                         <!-- 參數測試用 -->
-                        <!--
+                        
                         <argument>-import</argument>
-                        <argument>Address_Finish.csv</argument>
-                        -->
+                        <argument>https://www.tgos.tw/tgos/VirtualDir/AddrBatchQuery/40608_645f6cf9f987415bb74b520a304757a6/Address_Finish.csv</argument>
+                        
                     </arguments>
                     <skip>${skipTests}</skip>
                 </configuration>

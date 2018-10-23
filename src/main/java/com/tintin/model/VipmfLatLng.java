@@ -19,9 +19,10 @@ import org.apache.logging.log4j.Logger;
  */
 @Entity
 @Table(name = "vipmf_latlng")
-public class Vipmf_latlng implements Serializable{
-    
-    private static final Logger log = LogManager.getLogger(Vipmf_latlng.class);
+public class VipmfLatLng implements Serializable{
+
+    private static final long serialVersionUID = -8438491320434204915L;
+    private static final Logger log = LogManager.getLogger(VipmfLatLng.class);
     
     @Id
     @Column(name = "vip_code")
@@ -33,7 +34,7 @@ public class Vipmf_latlng implements Serializable{
     @Column(name = "lng")
     private double lng;
 
-    public Vipmf_latlng() {
+    public VipmfLatLng() {
         
     }
 
@@ -60,7 +61,10 @@ public class Vipmf_latlng implements Serializable{
     public void setLng(double lng) {
         this.lng = lng;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "VipmfLatLng{" + "vip_code=" + vip_code + ", lat=" + lat + ", lng=" + lng + '}';
+    }
     
 }

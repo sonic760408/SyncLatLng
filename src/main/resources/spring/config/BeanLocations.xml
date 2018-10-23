@@ -9,5 +9,5 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	
     <!-- Beans Declaration -->
     <import resource="../beans/Vipmf.xml"/>
-	
+    <import resource="../beans/VipmfLatLng.xml"/>
 </beans>
